@@ -7,19 +7,19 @@ import {
   removeUser,
 } from "../store/reducers/userSlice";
 import { useNavigate } from "react-router-dom";
+import EditUserModal from "./EditUserModal";
 
 const UserModal = ({ open, onClose, selectedUser }) => {
-  const { firstName, lastName, image, email } = selectedUser;
+  const { firstName, lastName, image } = selectedUser;
   const [isInFav, setIsInFav] = useState(false);
+  const [editUserModalOpen, setEditUserModalOpen] = useState(false);
   const { favUsers } = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log("favUsers", favUsers);
     if (favUsers.length > 0) {
       const isAvailable = favUsers.find((item) => item === selectedUser.id);
-      console.log("isAvailable", isAvailable);
       setIsInFav(isAvailable);
     }
   }, [favUsers, selectedUser]);
@@ -37,10 +37,14 @@ const UserModal = ({ open, onClose, selectedUser }) => {
     onClose();
   };
 
+  const handleEditUser = () => {
+    setEditUserModalOpen(true);
+  };
+
   return (
     <div>
-      <Modal open={open} onClose={onClose}>
-        <div className="min-h-[50vh] w-[80vh] bg-white m-auto my-[10vh] p-5">
+      <Modal key="user-details-modal" open={open} onClose={onClose}>
+        <div className="min-h-[50vh] w-[80vh] max-h-[80vh] overflow-auto bg-white m-auto my-[10vh] p-5">
           <div className="border-b-2 flex justify-between py-1">
             <div className="font-bold">User Details</div>
             <div onClick={onClose} className="font-bold cursor-pointer">
@@ -118,6 +122,14 @@ const UserModal = ({ open, onClose, selectedUser }) => {
             </div>
             <div className="mt-1">
               <button
+                onClick={handleEditUser}
+                className="p-3 bg-blue-500 text-white w-full"
+              >
+                Edit User
+              </button>
+            </div>
+            <div className="mt-1">
+              <button
                 onClick={handleRemoveUser}
                 className="p-3 bg-red-500 text-white w-full"
               >
@@ -127,6 +139,14 @@ const UserModal = ({ open, onClose, selectedUser }) => {
           </div>
         </div>
       </Modal>
+      {selectedUser && (
+        <EditUserModal
+          open={editUserModalOpen}
+          onClose={() => setEditUserModalOpen(false)}
+          selectedUser={selectedUser}
+          onSubmit={() => onClose()}
+        />
+      )}
     </div>
   );
 };
