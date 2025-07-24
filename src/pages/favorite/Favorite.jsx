@@ -9,6 +9,7 @@ const Favorite = () => {
   const { favUsers, list } = useSelector((state) => state.user);
   const [searchParam, setSearchParam] = useState("");
   const [filteredList, setFilteredList] = useState([]);
+  const [activeFilter, setActiveFilter] = useState("all");
 
   useEffect(() => {
     if (list.length > 0 && favUsers.length > 0) {
@@ -23,7 +24,7 @@ const Favorite = () => {
 
   useEffect(() => {
     if (searchParam) {
-      const tempList = [];
+      let tempList = [];
       usersList.forEach((user) => {
         if (
           user.firstName.toLowerCase().includes(searchParam) ||
@@ -32,11 +33,23 @@ const Favorite = () => {
           tempList.push(user);
         }
       });
+
+      if (activeFilter !== "all") {
+        tempList = tempList.filter((user) => user.gender === activeFilter);
+      }
+
       setFilteredList(tempList);
     } else {
+      if (activeFilter !== "all") {
+        const tempList = usersList.filter(
+          (user) => user.gender === activeFilter
+        );
+        setFilteredList(tempList);
+        return;
+      }
       setFilteredList(usersList);
     }
-  }, [usersList, searchParam]);
+  }, [searchParam, usersList, activeFilter]);
 
   return (
     <div className="flex gap-2 flex-col">
@@ -50,7 +63,12 @@ const Favorite = () => {
           </Link>
         </span>
       </div>
-      <SearchAndFilters setSearch={setSearchParam} search={searchParam} />
+      <SearchAndFilters
+        activeFilter={activeFilter}
+        setActiveFilter={setActiveFilter}
+        setSearch={setSearchParam}
+        search={searchParam}
+      />
       <UserList list={filteredList} />
     </div>
   );

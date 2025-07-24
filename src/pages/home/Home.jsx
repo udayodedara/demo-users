@@ -10,6 +10,7 @@ const Home = () => {
   const { list } = useSelector((state) => state.user);
   const [searchParam, setSearchParam] = useState("");
   const [filteredList, setFilteredList] = useState([]);
+  const [activeFilter, setActiveFilter] = useState("all");
 
   useEffect(() => {
     fetchUserList();
@@ -17,7 +18,7 @@ const Home = () => {
 
   useEffect(() => {
     if (searchParam) {
-      const tempList = [];
+      let tempList = [];
       list.forEach((user) => {
         if (
           user.firstName.toLowerCase().includes(searchParam) ||
@@ -26,11 +27,21 @@ const Home = () => {
           tempList.push(user);
         }
       });
+
+      if (activeFilter !== "all") {
+        tempList = tempList.filter((user) => user.gender === activeFilter);
+      }
+
       setFilteredList(tempList);
     } else {
+      if (activeFilter !== "all") {
+        const tempList = list.filter((user) => user.gender === activeFilter);
+        setFilteredList(tempList);
+        return;
+      }
       setFilteredList(list);
     }
-  }, [searchParam, list]);
+  }, [searchParam, list, activeFilter]);
 
   const fetchUserList = async () => {
     const res = await fetch("https://dummyjson.com/users?limit=10");
@@ -52,7 +63,12 @@ const Home = () => {
           </Link>
         </span>
       </div>
-      <SearchAndFilters setSearch={setSearchParam} search={searchParam} />
+      <SearchAndFilters
+        activeFilter={activeFilter}
+        setActiveFilter={setActiveFilter}
+        setSearch={setSearchParam}
+        search={searchParam}
+      />
       <UserList list={filteredList} />
     </div>
   );
